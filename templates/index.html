@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Segmentation</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <p class="eyebrow">MACHINE LEARNING PROJECT</p>
+            <h1>Customer Segmentation</h1>
+            <p>Discover customer groups using K-Means Clustering.</p>
+            <a href="#predict" class="hero-button">Explore Customers</a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="stats">
+            <div class="stat-card">
+                <span>Total Customers</span>
+                <h2>{{ total_customers }}</h2>
+            </div>
+            <div class="stat-card">
+                <span>Clusters Created</span>
+                <h2>5</h2>
+            </div>
+            <div class="stat-card">
+                <span>Algorithm</span>
+                <h2>K-Means</h2>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Customer Cluster Visualization</h2>
+            <p class="muted">
+                Each color represents a cluster. Black X markers show
+                the cluster centers (centroids).
+            </p>
+
+            <img class="chart"
+                 src="{{ url_for('static', filename='clusters.png') }}"
+                 alt="K-Means customer cluster scatter plot">
+        </section>
+
+        <section class="panel">
+            <h2>Cluster Summary</h2>
+            <p class="muted">
+                Average income is measured in thousands of dollars.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cluster</th>
+                            <th>Customer Group</th>
+                            <th>Customers</th>
+                            <th>Avg. Income</th>
+                            <th>Avg. Spending</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in summaries %}
+                        <tr>
+                            <td>Cluster {{ item.number }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.count }}</td>
+                            <td>{{ item.income }}k</td>
+                            <td>{{ item.spending }}/100</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel prediction-panel" id="predict">
+            <h2>Find a Customer's Cluster</h2>
+            <p class="muted">
+                Enter a customer's annual income and spending score.
+            </p>
+
+            <form action="{{ url_for('predict') }}"
+                  method="POST" id="customer-form">
+
+                <label for="income">
+                    Annual Income (in thousands of dollars)
+                </label>
+                <input type="number"
+                       id="income"
+                       name="income"
+                       min="0"
+                       max="1000"
+                       step="any"
+                       value="{{ income }}"
+                       placeholder="Example: 50"
+                       required>
+
+                <label for="spending">Spending Score (1-100)</label>
+                <input type="number"
+                       id="spending"
+                       name="spending"
+                       min="1"
+                       max="100"
+                       step="any"
+                       value="{{ spending }}"
+                       placeholder="Example: 75"
+                       required>
+
+                <div class="button-row">
+                    <button type="submit">Find My Cluster</button>
+                    <button type="button"
+                            class="secondary"
+                            id="demo-button">
+                        Try Example
+                    </button>
+                </div>
+            </form>
+
+            {% if result %}
+                {% if result.error %}
+                <div class="result error" role="alert">
+                    {{ result.error }}
+                </div>
+                {% else %}
+                <div class="result" role="status">
+                    <p>Your customer belongs to</p>
+                    <h3>Cluster {{ result.number }}</h3>
+                    <h4>{{ result.name }}</h4>
+                    <p>
+                        Income: {{ result.income }}k |
+                        Spending score: {{ result.spending }}
+                    </p>
+                    <p>
+                        This is the nearest cluster based on the
+                        trained K-Means model.
+                    </p>
+                </div>
+                {% endif %}
+            {% endif %}
+        </section>
+
+        <footer>
+            <p>Customer Segmentation | Python + Flask + Scikit-learn</p>
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
